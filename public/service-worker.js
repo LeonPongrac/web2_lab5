@@ -48,25 +48,45 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response.status === 404) {
-            return caches.match("404.html");
-        }
-        if (response.ok) {
-            if (response.status === 206) {}
-            else {
-                const clonedResponse = response.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clonedResponse));
-            }
-            
+    if (event.request.method === 'POST') {
+        return;
+    }
+    else {
+        if (event.request.url.includes('/data/')) {
+            event.respondWith(
+                fetch(event.request)
+                  .catch(() => {
+                    return caches.match('404.html');
+                  })
+              );
+          } else {
+            event.respondWith(
+                fetch(event.request)
+                  .then((response) => {
+                    if (response.status === 404) {
+                        return caches.match("404.html");
+                    }
+                    if (response.ok) {
+                        if (response.status === 206) {}
+                        else {
+                            if (event.request.method === 'POST') {
+                                return;
+                            }
+                            else {}
+                            const clonedResponse = response.clone();
+                            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clonedResponse));
+                        }
+                        
+                      }
+              
+                    return response;
+                  })
+                  .catch(() => {
+                    return caches.match(event.request);
+                  })
+              );
           }
+    }
+    
   
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request);
-      })
-  );
 });
