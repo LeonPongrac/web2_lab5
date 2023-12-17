@@ -7,7 +7,6 @@ const ffmpeg = require('fluent-ffmpeg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Set up multer storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
